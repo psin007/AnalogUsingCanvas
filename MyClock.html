@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>My Analog clock</title>
+	<link href="https://fonts.googleapis.com/css?family=Germania+One" rel="stylesheet">
+	<style>
+		body{
+			background-color: #333;	
+		}
+		#googlefont{
+			font-family: 'Germania One', cursive;
+			font-color:'red';
+		}
+		
+		#myCanvas {
+			background-color: #333;
+			position: fixed;
+			top: 50%;
+			left: 50%;
+			transform: translate(-50%,-50%);
+
+		}
+	</style>
+</head>
+<body>
+	<p id="googlefont">My Analog Clock </p>
+	<canvas id="myCanvas" width= "400" height="400" ></canvas>
+	<script>
+		var canvas = document.getElementById("myCanvas");
+		var ctx = canvas.getContext("2d");
+		var radius = canvas.width /2;
+		ctx.translate(radius,radius);
+		radius = radius * 0.9;
+		setInterval(drawClock,1000); //calling it every 1000th millisecond
+
+		function drawClock() {
+			drawFace(ctx, radius);
+			drawNumbers(ctx,radius);
+			drawTime(ctx,radius);
+		}
+
+		function drawFace(ctx, radius){
+			  var grad;
+  			  ctx.beginPath();
+  			  ctx.arc(0, 0, radius, 0, 2 * Math.PI);
+  			  ctx.fillStyle = 'white';
+  			  ctx.fill();
+  			  grad = ctx.createRadialGradient(0,0,radius * 0.95, 0,0,radius*1.05);
+  			  //createRadialGradient(x0, y0, r0, x1, y1, r1);
+  			  grad.addColorStop(0,'red');
+  			  grad.addColorStop(0.5,'white');
+  			  grad.addColorStop(1,'red');
+  			  ctx.strokeStyle = grad;
+  			  ctx.lineWidth = radius*0.1;
+  			  ctx.stroke();
+  			  ctx.beginPath();
+  			  ctx.arc(0,0,radius*0.1,0,2*Math.PI);
+  			  ctx.fillStyle = 'red';
+  			  ctx.fill();
+		}
+
+		function drawNumbers(ctx,radius){
+			var ang;
+			var num;
+			ctx.font = radius* 0.15 +"px arial";
+			ctx.textBaseline="middle";
+			ctx.textAlign="center";
+			for (num = 1;num <=12; num++){
+				ang = num * Math.PI / 6;
+				//2pi/12 ie 2pi is 360 degree
+				ctx.rotate(ang);
+				ctx.translate(0, -radius*0.85);
+				// to push it towards edge of clock // minus because to put after 180 degree rotation
+				ctx.rotate(-ang);
+				ctx.fillText(num.toString(),0,0);
+				//three lines below to make it at same point where it was at start of 1 // ie reversing it
+				ctx.rotate(ang);
+				ctx.translate(0,radius*0.85);
+				ctx.rotate(-ang);
+			}
+		}
+
+		function drawTime(ctx,radius){
+			var now = new Date();
+			var hour = now.getHours();
+			var minute = now.getMinutes();
+			var second = now.getSeconds();
+			//hour
+			hour = hour % 12; //so that hour is always less than 12
+			hour=(hour*Math.PI/6) + (minute*Math.PI/(6*60)) + (second*Math.PI/(360*60));
+			drawHand(ctx,hour,radius*0.5,radius*0.07);
+			//minute
+			minute = (minute*Math.PI/30) + (second*Math.PI/(30*60));
+			drawHand(ctx,minute,radius * 0.8 , radius*0.07);
+			//second
+			second=(second*Math.PI/30);
+			drawHand(ctx,second,radius*0.9,radius*0.02);
+		}
+
+		function drawHand(ctx,pos,length,width){
+			ctx.beginPath();
+			ctx.lineWidth = width;
+			ctx.lineCap = "round";
+			ctx.moveTo(0,0); //start of line
+			ctx.rotate(pos); // rotate at correct angle
+			ctx.lineTo(0,-length); // in same x axis and 180 degree opposite y axis of rotated line
+			ctx.stroke();
+			ctx.rotate(-pos); // making ctx back to normal for next minute or second to be called and have same logic
+		}
+
+	</script>
+</body>
+</html>
